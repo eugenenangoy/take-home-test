@@ -10,18 +10,18 @@ router.get('/',(req,res)=>{
 })
 
 //Routes For Authentication Controllers
-router.post('/auth/user', auth.signIn)
+router.post('/login', auth.signIn)
+router.post('/register', user.registerUser)
 
 //Routes For User Controllers
-router.get('/user', user.findAllUser)
-router.post('/user', user.registerUser)
-router.put('/user/:id', user.updateUser)
-router.delete('/user/:id', user.deleteUser)
+router.get('/user', auth.verifyToken, user.findAllUser)
+router.put('/user/:id', auth.verifyToken, user.updateUser)
+router.delete('/user/:id', auth.verifyToken, user.deleteUser)
 
 //Routes for CRUD Inventory
-router.get('/barang',  items.findAllItems)
-router.post('/barang', items.createItems)
-router.put('/barang/:id', items.updateItems)
-router.delete('/barang/:id', items.deleteItems)
+router.get('/barang', auth.verifyToken, items.findAllItems)
+router.post('/barang', auth.verifyToken, items.createItems)
+router.put('/barang/:id', auth.verifyToken, items.updateItems)
+router.delete('/barang/:id', auth.verifyToken, items.deleteItems)
 
-module.exports = router
+module.exports = router
