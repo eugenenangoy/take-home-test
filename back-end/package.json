@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "reverse:db": "sequelize-auto -o ./src/models -d takehometest -h localhost -u eugene -p 3306 -x 11111111 -e mysql"
+    "reverse:db": "sequelize-auto -o ./src/models -d takehometest -h localhost -u eugene -p 3306 -x 11111111 -e mysql",
+    "reverse:db:prod": "sequelize-auto -o ./src/models -d railway -h containers-us-west-172.railway.app -u root -p 6063 -x WvBOzS3zJV4a5phr6hvH -e mysql"
   },
   "author": "",
   "license": "ISC",
