@@ -92,7 +92,7 @@ const updateItems = async (req, res) => {
         harga_beli: req.body.harga_beli,
         harga_jual: req.body.harga_jual,
         stok_barang: req.body.stok_barang,
-        foto: downloadURL,
+        foto_barang: downloadURL,
       },
       {
         where: {
