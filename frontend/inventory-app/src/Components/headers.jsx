@@ -18,7 +18,7 @@ const Headers = ({ click }) => {
             type: 'divider',
         },
         {
-            label: 'Logout',
+            label: <Link to='/' onClick={()=> localStorage.clear()}>Logout</Link>,
             key: '1',
         },
     ];
