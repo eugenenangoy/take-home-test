@@ -6,6 +6,7 @@ import { RiBillLine } from 'react-icons/ri'
 import { FaMoneyBillWave, FaUsers, FaEye, FaTrash } from 'react-icons/fa'
 
 const Home = () => {
+    // const {barang} = useSelector((state)=> state.barangReducers)
     const { Search } = Input;
     const gridStyle = {
         width: '25%',

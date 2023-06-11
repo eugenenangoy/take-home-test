@@ -1,12 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Dashboard from "../Components/Layouts";
 import { Button, Form, Input, Modal, Space, Table, Row } from "antd";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import Modals from "../Components/Modal";
+import { doAddBarang, doEditBarang, doGetBarang } from "../Store/Actions/barangActions";
 import { ExclamationCircleFilled } from "@ant-design/icons";
+import { useDispatch, useSelector } from "react-redux";
+// import FormData from 'form-data'; 
 
 const { confirm } = Modal;
 const ListBarang = () => {
+  const dispatch = useDispatch();
+  const { barang } = useSelector((state) => state.barangReducers);
+
+  useEffect(() => {
+    dispatch(doGetBarang());
+  }, [barang]);
   const [openModal, setOpenModal] = useState(false);
   const [openModalEdit, setOpenModalEdit] = useState(false);
   const showModal = () => {
@@ -15,18 +24,34 @@ const ListBarang = () => {
   const close = () => {
     setOpenModal(false);
   };
-  const [editValue, setEditValue] = useState();
+  const [editValue, setEditValue] = useState({
+    id : '',
+    nama_barang : '',
+    harga_jual : '',
+    harga_beli : '',
+    stok_barang : '',
+    foto : []
+  });
+  const [addValue, setAddValue] = useState({
+    nama_barang : '',
+    harga_jual : '',
+    harga_beli : '',
+    stok_barang : '',
+    foto : []
+  })
   const editData = (data) => {
     setOpenModalEdit(true);
     console.log(data);
     setEditValue({
+      id : data.id ,
       nama_barang: data.nama_barang,
       harga_jual: data.harga_jual,
       harga_beli: data.harga_beli,
       stok_barang: data.stok_barang,
-      foto_barang: data.foto_barang,
+      foto: data.foto_barang,
     });
   };
+  
   const deleteItems = () => {
     confirm({
       title: "Anda Yakin Ingin Menghapus Data Ini?",
@@ -64,6 +89,12 @@ const ListBarang = () => {
       key: "stok_barang",
     },
     {
+      title: "Gambar Barang",
+      dataIndex: "foto_barang",
+      key: "foto_barang",
+      render: (_, record) => <img className="w-24" src={record.foto_barang} />,
+    },
+    {
       title: "Actions",
       dataIndex: "x",
       render: (_, record) => (
@@ -80,35 +111,34 @@ const ListBarang = () => {
       ),
     },
   ];
-  const rowTable = [
-    {
-      key: "1",
-      nama_barang: "Aqua",
-      harga_jual: 5000,
-      harga_beli: 3000,
-      stok_barang: 10,
-    },
-    {
-      key: "2",
-      nama_barang: "Aqua",
-      harga_jual: 5000,
-      harga_beli: 3000,
-      stok_barang: 10,
-    },
-    {
-      key: "3",
-      nama_barang: "Aqua",
-      harga_jual: 5000,
-      harga_beli: 3000,
-      stok_barang: 10,
-    },
-  ];
-  const onFinish = (data) => {
-    console.log(data);
+  const onFinish = () => {
+    const formData = new FormData();
+    formData.append('foto', addValue.foto[0]);
+    formData.append('nama_barang', addValue.nama_barang);
+    formData.append('harga_jual',parseInt(addValue.harga_jual))
+    formData.append('harga_beli',parseInt(addValue.harga_beli));
+    formData.append('stok_barang',parseInt(addValue.stok_barang))
+    // console.log(formData)
+    dispatch(doAddBarang(formData));
     setOpenModal(false);
+    setAddValue({
+    nama_barang : '',
+    harga_jual : '',
+    harga_beli : '',
+    stok_barang : '',
+    foto : []
+    })
   };
-  const onFinishEdit = (data) => {
-    console.log(data);
+  const onFinishEdit = () => {
+    const body = new FormData()
+    body.append('id', editValue.id)
+    body.append('foto', editValue.foto[0]);
+    body.append('nama_barang', editValue.nama_barang);
+    body.append('harga_jual',editValue.harga_jual)
+    body.append('harga_beli',editValue.harga_beli);
+    body.append('stok_barang',editValue.stok_barang);
+    dispatch(doEditBarang(body))
+    setOpenModalEdit(false)
   };
 
   const { Search } = Input;
@@ -118,64 +148,61 @@ const ListBarang = () => {
         List Barang
       </h1>
       <Row className="flex justify-between m-4">
-        <Button
-          onClick={showModal}
-          className="bg-blue-500 text-white"
-        >
+        <Button onClick={showModal} className="bg-blue-500 text-white">
           Tambah Barang
         </Button>
         <Input className="w-1/6" placeholder="Search" />
       </Row>
-      <Table dataSource={rowTable} columns={columnTable} className="mx-4" />
+      <Table dataSource={barang} columns={columnTable} className="mx-4" />
 
       <Modals
         handleOpen={openModal}
         handleClose={close}
         title={"Tambah / Edit Barang "}
       >
-        <Form layout="vertical" onFinish={onFinish} autoComplete="off">
+        <Form
+          layout="vertical"
+          onFinish={onFinish}
+          autoComplete="off"
+          encType="multipart/form-data"
+        >
           <Form.Item
             label="Nama Barang"
-            name={"nama_barang"}
             rules={[
               { required: true, message: "Nama Barang Tidak Boleh Kosong" },
             ]}
           >
-            <Input placeholder="Masukkan Nama Barang" />
+            <Input placeholder="Masukkan Nama Barang" onChange={e => setAddValue({...addValue, nama_barang:e.target.value})}/>
           </Form.Item>
           <Form.Item
             label="Harga Jual"
-            name={"harga_jual"}
             rules={[
               { required: true, message: "Harga Jual Tidak Boleh Kosong" },
             ]}
           >
-            <Input placeholder="0" type="number" />
+            <Input placeholder="0" type="number" onChange={e => setAddValue({...addValue, harga_jual:e.target.value})}/>
           </Form.Item>
           <Form.Item
             label="Harga Beli"
-            name={"harga_beli"}
             rules={[
               { required: true, message: "Harga Beli Tidak Boleh Kosong" },
             ]}
           >
-            <Input placeholder="0" type="number" />
+            <Input placeholder="0" type="number" onChange={e => setAddValue({...addValue, harga_beli:e.target.value})}/>
           </Form.Item>
           <Form.Item
             label="Stok Barang"
-            name={"stok_barang"}
             rules={[
               { required: true, message: "Stok Barang Tidak Boleh Kosong" },
             ]}
           >
-            <Input placeholder="0" type="number" />
+            <Input placeholder="0" type="number" onChange={e => setAddValue({...addValue, stok_barang:e.target.value})}/>
           </Form.Item>
           <Form.Item
             label="Gambar Barang"
-            name={"gambar_barang"}
             rules={[{ required: true, message: "Gambar Tidak Boleh Kosong" }]}
           >
-            <Input type="file" />
+            <Input type="file" onChange={e => setAddValue({...addValue, foto:[e.target.files[0]]})}/>
           </Form.Item>
           <Form.Item label=" " colon={false}>
             <div className="flex gap-2 justify-end">
@@ -201,6 +228,7 @@ const ListBarang = () => {
           layout="vertical"
           onFinish={onFinishEdit}
           autoComplete="off"
+          encType="miltipart/form-data"
           initialValues={editValue}
         >
           <Form.Item
@@ -210,7 +238,7 @@ const ListBarang = () => {
               { required: true, message: "Nama Barang Tidak Boleh Kosong" },
             ]}
           >
-            <Input placeholder="Masukkan Nama Barang" />
+            <Input placeholder="Masukkan Nama Barang" onChange={e => setEditValue({...editValue, nama_barang:e.target.value})} />
           </Form.Item>
           <Form.Item
             label="Harga Jual"
@@ -219,7 +247,7 @@ const ListBarang = () => {
               { required: true, message: "Harga Jual Tidak Boleh Kosong" },
             ]}
           >
-            <Input placeholder="0" type="number" />
+            <Input placeholder="0" type="number" onChange={e => setEditValue({...editValue, harga_jual:e.target.value})}/>
           </Form.Item>
           <Form.Item
             label="Harga Beli"
@@ -228,7 +256,7 @@ const ListBarang = () => {
               { required: true, message: "Harga Beli Tidak Boleh Kosong" },
             ]}
           >
-            <Input placeholder="0" type="number" />
+            <Input placeholder="0" type="number" onChange={e => setEditValue({...editValue, harga_beli:e.target.value})}/>
           </Form.Item>
           <Form.Item
             label="Stok Barang"
@@ -237,14 +265,14 @@ const ListBarang = () => {
               { required: true, message: "Stok Barang Tidak Boleh Kosong" },
             ]}
           >
-            <Input placeholder="0" type="number" />
+            <Input placeholder="0" type="number" onChange={e => setEditValue({...editValue, stok_barang:e.target.value})}/>
           </Form.Item>
           <Form.Item
             label="Gambar Barang"
             name={"gambar_barang"}
             rules={[{ required: true, message: "Gambar Tidak Boleh Kosong" }]}
           >
-            <Input type="file" />
+            <Input type="file" onChange={e => setEditValue({...editValue, foto:[e.target.files[0]]})}/>
           </Form.Item>
           <Form.Item label=" " colon={false}>
             <div className="flex gap-2 justify-end">

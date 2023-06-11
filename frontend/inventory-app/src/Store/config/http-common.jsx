@@ -14,7 +14,7 @@ export const FILE_API = (method, endpoint, data) =>{
         method : method,
         url :`https://inventory-app.cyclic.app/${endpoint}`,
         headers : {
-            'Content-Type': 'application/multipart-formdata',
+            'Content-Type': 'multipart/form-data',
             'Authorization': localStorage.getItem('token')
         },
         data : data
