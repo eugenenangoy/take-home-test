@@ -28,7 +28,7 @@ const registerUser = async(req,res) => {
                 username : req.body.username,
                 password : passwordHashing
             })
-            res.status(201).send('Used Didaftarkan')
+            res.status(201).send('User Didaftarkan')
         }
     } catch (error) {
         res.status(404).send(error.message)

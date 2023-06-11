@@ -13,7 +13,7 @@ function barangReducers(state = initialState, action) {
     case ActionTypes.ADD_BARANG:
       return { ...state };
     case ActionTypes.ADD_BARANG_SUCCEED:
-      return { ...state, barang: [...state.barang, action.payload] };
+      return { ...state, barang:  action.payload };
     case ActionTypes.EDIT_BARANG:
       return { ...state };
     case ActionTypes.EDIT_BARANG_SUCCEED:
@@ -39,6 +39,8 @@ function barangReducers(state = initialState, action) {
           (items) => items.id !== +action.payload
         )
       };
+      default :
+        return{...state}
   }
 }
 
