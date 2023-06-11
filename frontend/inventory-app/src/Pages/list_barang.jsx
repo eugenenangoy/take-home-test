@@ -3,7 +3,7 @@ import Dashboard from "../Components/Layouts";
 import { Button, Form, Input, Modal, Space, Table, Row } from "antd";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import Modals from "../Components/Modal";
-import { doAddBarang, doEditBarang, doGetBarang } from "../Store/Actions/barangActions";
+import { doAddBarang, doDeleteBarang, doEditBarang, doGetBarang } from "../Store/Actions/barangActions";
 import { ExclamationCircleFilled } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 // import FormData from 'form-data'; 
@@ -18,6 +18,7 @@ const ListBarang = () => {
   }, [barang]);
   const [openModal, setOpenModal] = useState(false);
   const [openModalEdit, setOpenModalEdit] = useState(false);
+  const [search, setSearch] = useState('')
   const showModal = () => {
     setOpenModal(true);
   };
@@ -41,7 +42,7 @@ const ListBarang = () => {
   })
   const editData = (data) => {
     setOpenModalEdit(true);
-    console.log(data);
+    // console.log(data);
     setEditValue({
       id : data.id ,
       nama_barang: data.nama_barang,
@@ -52,7 +53,7 @@ const ListBarang = () => {
     });
   };
   
-  const deleteItems = () => {
+  const deleteItems = (data) => {
     confirm({
       title: "Anda Yakin Ingin Menghapus Data Ini?",
       icon: <ExclamationCircleFilled />,
@@ -60,7 +61,8 @@ const ListBarang = () => {
       okType: "danger",
       cancelText: "No",
       onOk() {
-        console.log("Ok");
+        console.log(data);
+        dispatch(doDeleteBarang(data))
       },
       onCancel() {
         console.log("Cancel");
@@ -105,7 +107,7 @@ const ListBarang = () => {
           />
           <FaTrash
             className="cursor-pointer text-blue-600"
-            onClick={deleteItems}
+            onClick={()=>deleteItems(record.id)}
           />
         </Space>
       ),
@@ -120,27 +122,34 @@ const ListBarang = () => {
     formData.append('stok_barang',parseInt(addValue.stok_barang))
     // console.log(formData)
     dispatch(doAddBarang(formData));
-    setOpenModal(false);
     setAddValue({
-    nama_barang : '',
-    harga_jual : '',
-    harga_beli : '',
-    stok_barang : '',
-    foto : []
+      nama_barang : '',
+      harga_jual : '',
+      harga_beli : '',
+      stok_barang : '',
+      foto : []
     })
+    setOpenModal(false);
   };
   const onFinishEdit = () => {
     const body = new FormData()
+    console.log(editValue)
     body.append('id', editValue.id)
     body.append('foto', editValue.foto[0]);
     body.append('nama_barang', editValue.nama_barang);
     body.append('harga_jual',editValue.harga_jual)
     body.append('harga_beli',editValue.harga_beli);
     body.append('stok_barang',editValue.stok_barang);
-    dispatch(doEditBarang(body))
+    dispatch(doEditBarang({id : editValue.id, body}))
     setOpenModalEdit(false)
   };
-
+  const filterData = barang.filter((item)=>{
+    if(search == ""){
+      return item
+    }else{
+      return item.nama_barang.toLowerCase().includes(search)
+    }
+  })
   const { Search } = Input;
   return (
     <Dashboard>
@@ -151,9 +160,9 @@ const ListBarang = () => {
         <Button onClick={showModal} className="bg-blue-500 text-white">
           Tambah Barang
         </Button>
-        <Input className="w-1/6" placeholder="Search" />
+        <Search className="w-1/6" placeholder="Cari Barang" onChange={(e)=> setSearch(e.target.value.toLocaleLowerCase())}/>
       </Row>
-      <Table dataSource={barang} columns={columnTable} className="mx-4" />
+      <Table dataSource={filterData} columns={columnTable} className="mx-4" />
 
       <Modals
         handleOpen={openModal}
@@ -172,7 +181,7 @@ const ListBarang = () => {
               { required: true, message: "Nama Barang Tidak Boleh Kosong" },
             ]}
           >
-            <Input placeholder="Masukkan Nama Barang" onChange={e => setAddValue({...addValue, nama_barang:e.target.value})}/>
+            <Input placeholder="Masukkan Nama Barang" value={addValue.nama_barang} onChange={e => setAddValue({...addValue, nama_barang:e.target.value})}/>
           </Form.Item>
           <Form.Item
             label="Harga Jual"
@@ -180,7 +189,7 @@ const ListBarang = () => {
               { required: true, message: "Harga Jual Tidak Boleh Kosong" },
             ]}
           >
-            <Input placeholder="0" type="number" onChange={e => setAddValue({...addValue, harga_jual:e.target.value})}/>
+            <Input placeholder="0" type="number" value={parseInt(addValue.harga_jual)} onChange={e => setAddValue({...addValue, harga_jual:e.target.value})}/>
           </Form.Item>
           <Form.Item
             label="Harga Beli"
@@ -188,7 +197,7 @@ const ListBarang = () => {
               { required: true, message: "Harga Beli Tidak Boleh Kosong" },
             ]}
           >
-            <Input placeholder="0" type="number" onChange={e => setAddValue({...addValue, harga_beli:e.target.value})}/>
+            <Input placeholder="0" type="number" value={parseInt(addValue.harga_beli)} onChange={e => setAddValue({...addValue, harga_beli:e.target.value})}/>
           </Form.Item>
           <Form.Item
             label="Stok Barang"
@@ -196,13 +205,13 @@ const ListBarang = () => {
               { required: true, message: "Stok Barang Tidak Boleh Kosong" },
             ]}
           >
-            <Input placeholder="0" type="number" onChange={e => setAddValue({...addValue, stok_barang:e.target.value})}/>
+            <Input placeholder="0" type="number" value={parseInt(addValue.stok_barang)} onChange={e => setAddValue({...addValue, stok_barang:e.target.value})}/>
           </Form.Item>
           <Form.Item
             label="Gambar Barang"
             rules={[{ required: true, message: "Gambar Tidak Boleh Kosong" }]}
           >
-            <Input type="file" onChange={e => setAddValue({...addValue, foto:[e.target.files[0]]})}/>
+            <Input type="file" data-title={addValue.foto ? addValue.foto[0] : "No file choosen"} onChange={e => setAddValue({...addValue, foto:[e.target.files[0]]})}/>
           </Form.Item>
           <Form.Item label=" " colon={false}>
             <div className="flex gap-2 justify-end">
@@ -238,7 +247,7 @@ const ListBarang = () => {
               { required: true, message: "Nama Barang Tidak Boleh Kosong" },
             ]}
           >
-            <Input placeholder="Masukkan Nama Barang" onChange={e => setEditValue({...editValue, nama_barang:e.target.value})} />
+            <Input placeholder="Masukkan Nama Barang" value={editValue.nama_barang} onChange={e => setEditValue({...editValue, nama_barang:e.target.value})} />
           </Form.Item>
           <Form.Item
             label="Harga Jual"
@@ -247,7 +256,7 @@ const ListBarang = () => {
               { required: true, message: "Harga Jual Tidak Boleh Kosong" },
             ]}
           >
-            <Input placeholder="0" type="number" onChange={e => setEditValue({...editValue, harga_jual:e.target.value})}/>
+            <Input placeholder="0" type="number" value={editValue.harga_jual} onChange={e => setEditValue({...editValue, harga_jual:e.target.value})}/>
           </Form.Item>
           <Form.Item
             label="Harga Beli"
@@ -256,7 +265,7 @@ const ListBarang = () => {
               { required: true, message: "Harga Beli Tidak Boleh Kosong" },
             ]}
           >
-            <Input placeholder="0" type="number" onChange={e => setEditValue({...editValue, harga_beli:e.target.value})}/>
+            <Input placeholder="0" type="number" value={editValue.harga_beli} onChange={e => setEditValue({...editValue, harga_beli:e.target.value})}/>
           </Form.Item>
           <Form.Item
             label="Stok Barang"
@@ -265,14 +274,14 @@ const ListBarang = () => {
               { required: true, message: "Stok Barang Tidak Boleh Kosong" },
             ]}
           >
-            <Input placeholder="0" type="number" onChange={e => setEditValue({...editValue, stok_barang:e.target.value})}/>
+            <Input placeholder="0" type="number" value={editValue.stok_barang} onChange={e => setEditValue({...editValue, stok_barang:e.target.value})}/>
           </Form.Item>
           <Form.Item
             label="Gambar Barang"
             name={"gambar_barang"}
             rules={[{ required: true, message: "Gambar Tidak Boleh Kosong" }]}
           >
-            <Input type="file" onChange={e => setEditValue({...editValue, foto:[e.target.files[0]]})}/>
+            <Input type="file" data-title={editValue.foto ? editValue.foto[0] : "No filechoosen"} onChange={e => setEditValue({...editValue, foto:[e.target.files[0]]})}/>
           </Form.Item>
           <Form.Item label=" " colon={false}>
             <div className="flex gap-2 justify-end">

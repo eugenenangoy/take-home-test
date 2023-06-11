@@ -14,7 +14,7 @@ function* handleGetBarang (){
 
 function* handleAddBarang (action){
     try {
-        const res = yield axios (FILE_API('post', 'barang', action.payload))
+        yield axios (FILE_API('post', 'barang', action.payload))
         const data = yield axios (API('get', 'barang'))
         yield put ({type : ActionTypes.ADD_BARANG_SUCCEED, payload : data.data})
     } catch (error) {
@@ -24,8 +24,7 @@ function* handleAddBarang (action){
 
 function* handleUpdateBarang (action){
     try {
-        console.log(action.payload)
-        const res = yield axios (FILE_API('put', `barang/${action.payload.id}`))
+        yield axios (FILE_API('put', `barang/${action.payload.id}`, action.payload.body))
         const data = yield axios(API('get', 'barang'))
         yield put ({type: ActionTypes.EDIT_BARANG_SUCCEED, payload : data.data})
     } catch (error) {
@@ -33,10 +32,21 @@ function* handleUpdateBarang (action){
     }
 }
 
+function* handleDeleteBarang (action){
+    try {
+        yield axios (API('delete', `barang/${action.payload}`))
+        const data = yield axios (API('get', 'barang'))
+        yield put ({type : ActionTypes.DELETE_BARANG_SUCCEED, payload : data.data})
+    } catch (error) {
+        yield put({type : ActionTypes.DELETE_BARANG_FAILED, payload: error.message})
+    }
+}
+
 export function* watchListGet(){
     yield all([
         yield takeEvery(ActionTypes.GET_BARANG, handleGetBarang),
         yield takeEvery(ActionTypes.ADD_BARANG, handleAddBarang),
-        yield takeEvery(ActionTypes.EDIT_BARANG, handleUpdateBarang)
+        yield takeEvery(ActionTypes.EDIT_BARANG, handleUpdateBarang),
+        yield takeEvery(ActionTypes.DELETE_BARANG, handleDeleteBarang)
     ])
 }

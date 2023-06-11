@@ -13,7 +13,7 @@ const Dashboard = ({ children }) => {
         {
             name: 'Beranda',
             icon: <FaHome />,
-            href: '/'
+            href: '/beranda'
         },
         {
             name: 'Data Barang',
