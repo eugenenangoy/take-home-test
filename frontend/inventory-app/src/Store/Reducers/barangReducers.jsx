@@ -13,14 +13,12 @@ function barangReducers(state = initialState, action) {
     case ActionTypes.ADD_BARANG:
       return { ...state };
     case ActionTypes.ADD_BARANG_SUCCEED:
-      return { ...state, barang:  action.payload };
+      return { ...state, barang: action.payload };
     case ActionTypes.EDIT_BARANG:
       return { ...state };
     case ActionTypes.EDIT_BARANG_SUCCEED:
       state.barang.splice(
-        state.barang.findIndex(
-          (i) => i.id == action.payload.id
-        ),
+        state.barang.findIndex((i) => i.id == action.payload.id),
         1,
         action.payload
       );
@@ -35,12 +33,10 @@ function barangReducers(state = initialState, action) {
     case ActionTypes.DELETE_BARANG_SUCCEED:
       return {
         ...state,
-        barang: state.payBank.filter(
-          (items) => items.id !== +action.payload
-        )
+        barang: state.payBank.filter((items) => items.id !== +action.payload),
       };
-      default :
-        return{...state}
+    default:
+      return { ...state };
   }
 }
 

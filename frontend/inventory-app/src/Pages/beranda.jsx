@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Dashboard from '../Components/Layouts'
-import { Card, Col, Row, Input, Table, Tag, Space, Select } from 'antd'
+import { Card, Col, Row, Input, Table, Tag, Space, Select, Button } from 'antd'
+import Modals from '../Components/Modal'
 import { RiBillLine } from 'react-icons/ri'
 import { FaMoneyBillWave, FaUsers, FaEye, FaTrash } from 'react-icons/fa'
 
@@ -10,6 +11,15 @@ const Home = () => {
         width: '25%',
         textAlign: 'center',
     };
+
+    const [openModal, setOpenModal] = useState(false)
+
+    const open = () =>{
+        setOpenModal(true)
+    }
+    const close = () =>{
+        setOpenModal(false)
+    }
     return (
         <Dashboard>
             <p className='text-start'>Beranda</p>
@@ -26,10 +36,18 @@ const Home = () => {
                         <h3 class="text-lg font-bold text-white">Product Name with a Very Long Name That Wraps</h3>
                         <p class="text-gray-300">Rp. 50.000</p>
                     </div>
+                    <div className='flex justify-end'>
+                        <Button className='m-4 bg-blue-500 text-white' onClick={open}>
+                            See Details
+                        </Button>
+                    </div>
                 </div>
-
-                
             </Row>
+            <Modals title={'Details'} handleOpen={openModal} handleClose={close}>
+                <Row className='flex justify-between m-4'>
+                    <img className='w-full h-52 object-fill' src='https://assets.klikindomaret.com/products/20064438/20064438_1.jpg' alt='Product Image'/>
+                </Row>
+            </Modals>
         </Dashboard>
     )
 }

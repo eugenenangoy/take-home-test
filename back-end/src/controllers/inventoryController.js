@@ -1,6 +1,6 @@
 const {models} = require('../models/init-models')
-const multer = require('multer')
-const upload = multer({ dest: 'uploads/' });
+const { getStorage, ref, getDownloadURL, uploadBytesResumable } = require("firebase/storage");
+
 
 const findAllItems = async(req, res) =>{
     try {
@@ -12,13 +12,27 @@ const findAllItems = async(req, res) =>{
 }
 
 const createItems = async(req, res) => {
+    const storage = getStorage();
     try {
+        const storageRef = ref(storage, `files/${req.file.originalname}`);
+
+        // Create file metadata including the content type
+        const metadata = {
+            contentType: req.file.mimetype,
+        };
+
+        // Upload the file in the bucket storage
+        const snapshot = await uploadBytesResumable(storageRef, req.file.buffer, metadata);
+        //by using uploadBytesResumable we can control the progress of uploading like pause, resume, cancel
+
+        // Grab the public url
+        const downloadURL = await getDownloadURL(snapshot.ref);
         await models.barang.create({
             nama_barang : req.body.nama_barang,
             harga_beli : req.body.harga_beli,
             harga_jual : req.body.harga_jual,
             stok_barang : req.body.stok_barang,
-            foto_barang : req.file.path
+            foto_barang : downloadURL
         })
         res.status(201).send('Items Sudah Ditambahkan')
     } catch (error) {

@@ -18,7 +18,6 @@ const signIn = async (req, res) => {
       });
     } else {
       const dataPassword = checkUsername.dataValues
-      console.log(dataPassword)
       if (bcrypt.compareSync(req.body.password, dataPassword.password)) {
         delete dataPassword.password;
         const token = jwt.sign(dataPassword, process.env.ACCESS_TOKEN, {
